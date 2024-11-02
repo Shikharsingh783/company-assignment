@@ -95,7 +95,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
               mrp: mrp,
               description: description,
               category: selectedCategory,
-              brand: selectedBrand!,
+              brand: selectedBrand,
               unit: selectedUnit ?? '',
               warehouse: selectedWarehouse ?? '',
               tax: selectedTax ?? '',

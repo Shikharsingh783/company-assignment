@@ -1,5 +1,5 @@
-// lib/services/product_service.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 
 class ProductService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -22,7 +22,8 @@ class ProductService {
     required String? taxType,
   }) async {
     try {
-      await _firestore.collection('products').add({
+      // Add product to Firestore and get the document reference
+      DocumentReference docRef = await _firestore.collection('products').add({
         'name': name,
         'productCode': productCode,
         'manufacturer': manufacturer,
@@ -40,10 +41,30 @@ class ProductService {
         'taxType': taxType,
         'createdAt': FieldValue.serverTimestamp(),
       });
-      print("Product saved successfully!");
+
+      // Update the document with its ID
+      await docRef.update({'productId': docRef.id});
+
+      print("Product saved successfully with ID: ${docRef.id}!");
     } catch (e) {
       print("Failed to save product: $e");
       throw e; // Re-throw the error for further handling if needed
+    }
+  }
+
+  final CollectionReference _productsCollection =
+      FirebaseFirestore.instance.collection('products');
+
+  Future<void> deleteProduct(String productId, BuildContext context) async {
+    try {
+      await _productsCollection.doc(productId).delete();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Product deleted successfully')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error deleting product: $e')),
+      );
     }
   }
 }

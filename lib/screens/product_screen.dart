@@ -1,4 +1,6 @@
+import 'package:assignment/components/product_tile.dart';
 import 'package:assignment/screens/add_product_screen.dart';
+import 'package:assignment/services/db_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
@@ -13,23 +15,33 @@ class _ProductScreenState extends State<ProductScreen> {
   final CollectionReference _productsCollection =
       FirebaseFirestore.instance.collection('products');
 
+  ProductService productService = ProductService();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey.shade700,
       appBar: AppBar(
+        backgroundColor: Colors.black,
         title: const Text(
           'Products',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
+          style: TextStyle(
+              fontWeight: FontWeight.bold, fontSize: 24, color: Colors.white),
         ),
       ),
-      body: StreamBuilder(
+      body: StreamBuilder<QuerySnapshot>(
         stream: _productsCollection.snapshots(),
-        builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+        builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return const Center(child: Text("No products available"));
+            return const Center(
+              child: Text(
+                "No products available",
+                style: TextStyle(color: Colors.black),
+              ),
+            );
           }
 
           return ListView.builder(
@@ -41,6 +53,37 @@ class _ProductScreenState extends State<ProductScreen> {
                 name: product['name'],
                 productCode: product['productCode'],
                 price: product['mrp'],
+                stocks: product['stocks'],
+                productId: product.id, // Use product.id for Firestore ID
+                onDelete: () async {
+                  // Show confirmation dialog before deleting
+                  final confirmDelete = await showDialog<bool>(
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                        title: const Text('Delete Product'),
+                        content: const Text(
+                            'Are you sure you want to delete this product?'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(false),
+                            child: const Text('Cancel'),
+                          ),
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(true),
+                            child: const Text('Delete'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+
+                  // If confirmed, delete the product
+                  if (confirmDelete == true) {
+                    await productService.deleteProduct(
+                        product.id, context); // Delete product by ID
+                  }
+                },
               );
             },
           );
@@ -54,67 +97,7 @@ class _ProductScreenState extends State<ProductScreen> {
           );
         },
         backgroundColor: Colors.black,
-        child: const Icon(Icons.add),
-      ),
-    );
-  }
-}
-
-class ProductTile extends StatelessWidget {
-  final String name;
-  final String productCode;
-  final double price;
-  final String? imageUrl;
-
-  const ProductTile({
-    Key? key,
-    required this.name,
-    required this.productCode,
-    required this.price,
-    this.imageUrl,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      margin: const EdgeInsets.symmetric(vertical: 8.0),
-      elevation: 3,
-      child: ListTile(
-        leading: ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: imageUrl != null
-              ? Image.network(
-                  imageUrl!,
-                  width: 50,
-                  height: 50,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) =>
-                      const Icon(Icons.image),
-                )
-              : const Icon(
-                  Icons.shopping_bag,
-                  size: 50,
-                  color: Colors.grey,
-                ),
-        ),
-        title: Text(
-          name,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-          ),
-        ),
-        subtitle: Text(
-          'Code: $productCode\nPrice: \$${price.toStringAsFixed(2)}',
-          style: const TextStyle(fontSize: 14),
-        ),
-        trailing: IconButton(
-          icon: const Icon(Icons.arrow_forward_ios),
-          onPressed: () {
-            // Navigate to product details or edit screen
-          },
-        ),
+        child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }
