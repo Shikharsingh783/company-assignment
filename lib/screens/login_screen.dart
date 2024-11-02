@@ -54,7 +54,10 @@ class _LoginPageState extends State<LoginPage> {
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFF4A90E2), Color(0xFF50E3C2)],
+            colors: [
+              Color(0xFF4A90E2),
+              Color(0xFF50E3C2),
+            ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -123,7 +126,10 @@ class _LoginPageState extends State<LoginPage> {
                               ),
                               child: const Text(
                                 'Login',
-                                style: TextStyle(fontSize: 16),
+                                style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.bold),
                               ),
                             ),
                           ),
