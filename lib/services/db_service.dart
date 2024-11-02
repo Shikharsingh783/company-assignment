@@ -1,61 +1,49 @@
-import 'package:assignment/models/product_model.dart';
+// lib/services/product_service.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ProductService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // Collection reference for products
-  CollectionReference get _productsCollection =>
-      _firestore.collection('products');
-
-  // Add a new product to Firestore
-  Future<void> addProduct(Product product) async {
+  Future<void> saveProduct({
+    required String name,
+    required String productCode,
+    required String manufacturer,
+    required String description,
+    required double stocks,
+    required double margin,
+    required double excTax,
+    required double purchasePrice,
+    required double mrp,
+    required String? category,
+    required String? brand,
+    required String? unit,
+    required String? warehouse,
+    required String? tax,
+    required String? taxType,
+  }) async {
     try {
-      await _productsCollection.add(product.toMap());
+      await _firestore.collection('products').add({
+        'name': name,
+        'productCode': productCode,
+        'manufacturer': manufacturer,
+        'description': description,
+        'stocks': stocks,
+        'margin': margin,
+        'excTax': excTax,
+        'purchasePrice': purchasePrice,
+        'mrp': mrp,
+        'category': category,
+        'brand': brand,
+        'unit': unit,
+        'warehouse': warehouse,
+        'tax': tax,
+        'taxType': taxType,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+      print("Product saved successfully!");
     } catch (e) {
-      print("Failed to add product: $e");
-      // Optionally handle the error or throw it
+      print("Failed to save product: $e");
+      throw e; // Re-throw the error for further handling if needed
     }
-  }
-
-  // Update an existing product by its document ID
-  Future<void> updateProduct(String productId, Product product) async {
-    try {
-      await _productsCollection.doc(productId).update(product.toMap());
-    } catch (e) {
-      print("Failed to update product: $e");
-    }
-  }
-
-  // Delete a product by its document ID
-  Future<void> deleteProduct(String productId) async {
-    try {
-      await _productsCollection.doc(productId).delete();
-    } catch (e) {
-      print("Failed to delete product: $e");
-    }
-  }
-
-  // Get a stream of all products in the collection
-  Stream<List<Product>> getProducts() {
-    return _productsCollection.snapshots().map((snapshot) {
-      return snapshot.docs.map((doc) {
-        final data = doc.data() as Map<String, dynamic>;
-        return Product.fromMap(data);
-      }).toList();
-    });
-  }
-
-  // Get a single product by its document ID
-  Future<Product?> getProductById(String productId) async {
-    try {
-      final doc = await _productsCollection.doc(productId).get();
-      if (doc.exists) {
-        return Product.fromMap(doc.data() as Map<String, dynamic>);
-      }
-    } catch (e) {
-      print("Failed to get product: $e");
-    }
-    return null;
   }
 }
