@@ -151,7 +151,8 @@ class _AddProductScreenState extends State<AddProductScreen> {
                   children: [
                     Expanded(
                       child: buildTextField(
-                          "Stocks", _stocksController, "Enter Stocks"),
+                          "Stocks", _stocksController, "Enter Stocks",
+                          isNumeric: true),
                     ),
                     const SizedBox(width: 10),
                     Expanded(
@@ -178,16 +179,14 @@ class _AddProductScreenState extends State<AddProductScreen> {
                   children: [
                     Expanded(
                       child: buildTextField(
-                        "Exc. Tax",
-                        _excTaxController,
-                        "Exc. Tax",
-                      ),
+                          "Exc. Tax", _excTaxController, "Exc. Tax",
+                          isNumeric: true),
                     ),
                     const SizedBox(width: 10),
                     Expanded(
                       child: buildTextField(
                           "Margin %", _marginController, "Margin %",
-                          required: true),
+                          required: true, isNumeric: true),
                     ),
                   ],
                 ),
@@ -196,13 +195,13 @@ class _AddProductScreenState extends State<AddProductScreen> {
                     Expanded(
                       child: buildTextField("Purchase Price",
                           _purchasePriceController, "Enter Purchase Price",
-                          required: true),
+                          required: true, isNumeric: true),
                     ),
                     const SizedBox(width: 10),
                     Expanded(
                       child: buildTextField(
                           "MRP", _mrpController, "Auto-calculated MRP",
-                          required: true, enabled: false),
+                          required: true, enabled: false, isNumeric: true),
                     ),
                   ],
                 ),
@@ -245,13 +244,17 @@ class _AddProductScreenState extends State<AddProductScreen> {
 
   Widget buildTextField(
       String label, TextEditingController controller, String hint,
-      {bool enabled = true, int maxLines = 1, bool required = false}) {
+      {bool enabled = true,
+      int maxLines = 1,
+      bool required = false,
+      bool isNumeric = false}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: TextFormField(
         controller: controller,
         enabled: enabled,
         maxLines: maxLines,
+        keyboardType: isNumeric ? TextInputType.number : TextInputType.text,
         decoration: InputDecoration(
           labelText: label,
           hintText: hint,
@@ -263,7 +266,6 @@ class _AddProductScreenState extends State<AddProductScreen> {
             borderSide: BorderSide(color: Colors.red, width: 2),
           ),
         ),
-        keyboardType: enabled ? TextInputType.number : null,
         validator: required
             ? (value) {
                 if (value == null || value.isEmpty) {
